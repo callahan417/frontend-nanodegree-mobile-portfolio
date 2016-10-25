@@ -15,7 +15,7 @@ Creator:
 Cameron Pittman, Udacity Course Developer
 cameron *at* udacity *dot* com
 */
-
+var initial = true;
 // As you may have realized, this website randomly generates pizzas.
 // Here are arrays of all possible pizza ingredients.
 var pizzaIngredients = {};
@@ -500,12 +500,35 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
+  var phases = [];
+  var windowWidth = window.innerWidth;
 
-  var items = document.querySelectorAll('.mover');
-  for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+  var scrollTop = document.body.scrollTop;
+  for (var index = 0; index < 5; index++) {
+    phases[index] = Math.sin((scrollTop/ 1250) + (index % 5));
   }
+  //console.log("phases array: ", phases);
+  //console.log("Window Height: " + window.innerHeight);
+
+  var items = document.getElementsByClassName('mover');
+
+  for (var i = 0; i < items.length; i++) {
+    //var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    //console.log(phase, document.body.scrollTop)
+    //console.log(items[i].basicLeft + 100 * phases[i % 5]);
+
+    // If the pizza will be off the page, don't change its position
+    if (((items[i].basicLeft + 100 * phases[i % 5]) > windowWidth ||
+     (items[i].basicLeft + 100 * phases[i % 5]) < -74) && !initial) {
+      continue;
+    }
+
+    items[i].style.left = items[i].basicLeft + 100 * phases[i % 5] + 'px';//phase
+
+    //console.log("Pizza #" + i + "  left, top: ", items[i].style.left, items[i].style.top);
+  }
+
+  if (initial) {initial = false;}
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
@@ -524,7 +547,8 @@ window.addEventListener('scroll', updatePositions);
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  var windowHeight = window.innerHeight;
+  for (var i = 0; Math.floor(i / cols) * s < windowHeight; i++) {//var i = 0; i < 200; i++
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
