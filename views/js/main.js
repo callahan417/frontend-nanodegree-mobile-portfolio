@@ -15,8 +15,11 @@ Creator:
 Cameron Pittman, Udacity Course Developer
 cameron *at* udacity *dot* com
 */
-var initial = true;
-var items = [];
+
+//Global Variables
+var initial = true;//Indicates the first execution of updatePositions
+var items = [];//Stores the DOM elements that contain the resizable pizzas
+
 // As you may have realized, this website randomly generates pizzas.
 // Here are arrays of all possible pizza ingredients.
 var pizzaIngredients = {};
@@ -422,32 +425,6 @@ var resizePizzas = function(size) {
 
   changeSliderLabel(size);
 
-   // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
-  /*function determineDx (elem, size) {
-    var oldWidth = elem.offsetWidth;
-    var windowWidth = document.querySelector("#randomPizzas").offsetWidth;
-    var oldSize = oldWidth / windowWidth;
-
-    // Changes the slider value to a percent width
-    function sizeSwitcher (size) {
-      switch(size) {
-        case "1":
-          return 0.25;
-        case "2":
-          return 0.3333;
-        case "3":
-          return 0.5;
-        default:
-          console.log("bug in sizeSwitcher");
-      }
-    }
-
-    var newSize = sizeSwitcher(size);
-    var dx = (newSize - oldSize) * windowWidth;
-
-    return dx;
-  }*/
-
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
     var newWidth;
@@ -525,15 +502,8 @@ function updatePositions() {
   for (var index = 0; index < 5; index++) {
     phases[index] = Math.sin((scrollTop/ 1250) + (index % 5));
   }
-  //console.log("phases array: ", phases);
-  //console.log("Window Height: " + window.innerHeight);
-
-  //var items = document.getElementsByClassName('mover');
 
   for (var i = 0; i < items.length; i++) {
-    //var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
-    //console.log(phase, document.body.scrollTop)
-    //console.log(items[i].basicLeft + 100 * phases[i % 5]);
 
     // If the pizza will be off the page, don't change its position
     if (((items[i].basicLeft + 100 * phases[i % 5]) > windowWidth ||
@@ -541,11 +511,18 @@ function updatePositions() {
       continue;
     }
 
-    items[i].style.left = items[i].basicLeft + 100 * phases[i % 5] + 'px';//phase
+    //set initial position of pizzas
+    if (initial) {
+          items[i].style.left = items[i].basicLeft + 'px';//100 * phases[i % 5]
+    }
+    //change positions based on scrolling distance (i.e. scrollTop)
+    items[i].style.transform = 'translateX(' + (100 * phases[i % 5]) + 'px)';//items[i].basicLeft +
+    //items[i].style.left = items[i].basicLeft + 100 * phases[i % 5] + 'px';
 
     //console.log("Pizza #" + i + "  left, top: ", items[i].style.left, items[i].style.top);
   }
 
+  // After updatePositions runs once, set initial indicator to false
   if (initial) {initial = false;}
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
