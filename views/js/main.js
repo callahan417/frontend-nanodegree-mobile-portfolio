@@ -1,27 +1,9 @@
-/*
-Welcome to the 60fps project! Your goal is to make Cam's Pizzeria website run
-jank-free at 60 frames per second.
-
-There are two major issues in this code that lead to sub-60fps performance. Can
-you spot and fix both?
-
-
-Built into the code, you'll find a few instances of the User Timing API
-(window.performance), which will be console.log()ing frame rate data into the
-browser console. To learn more about User Timing API, check out:
-http://www.html5rocks.com/en/tutorials/webperformance/usertiming/
-
-Creator:
-Cameron Pittman, Udacity Course Developer
-cameron *at* udacity *dot* com
-*/
 
 //Global Variables
 var initial = true;//Indicates the first execution of updatePositions
 var items = [];//Stores the DOM elements that contain the resizable pizzas
+var animating = false;//Indicates a pending call to requestAnimationFrame
 
-// As you may have realized, this website randomly generates pizzas.
-// Here are arrays of all possible pizza ingredients.
 var pizzaIngredients = {};
 pizzaIngredients.meats = [
   "Pepperoni",
@@ -379,7 +361,7 @@ var pizzaElementGenerator = function(i) {
   pizzaContainer.classList.add("randomPizzaContainer");
   pizzaContainer.style.width = "33.33%";
   pizzaContainer.style.height = "325px";
-  pizzaContainer.id = "pizza" + i;                // gives each pizza element a unique id
+  pizzaContainer.id = "pizza" + i;// gives each pizza element a unique id
   pizzaImageContainer.style.width="35%";
 
   pizzaImage.src = "images/pizza.png";
@@ -408,7 +390,7 @@ var resizePizzas = function(size) {
 
   // Changes the value for the size of the pizza above the slider
   function changeSliderLabel(size) {
-    switch(size) {
+    switch (size) {
       case "1":
         document.querySelector("#pizzaSize").innerHTML = "Small";
         return;
@@ -428,7 +410,7 @@ var resizePizzas = function(size) {
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
     var newWidth;
-    switch(size) {
+    switch (size) {
       case "1":
         newWidth = 25 + '%';
         break;
@@ -445,8 +427,6 @@ var resizePizzas = function(size) {
     var randomPizzas = document.getElementsByClassName('randomPizzaContainer');
 
     for (var i = 0; i < randomPizzas.length; i++) {
-      //var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      //var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
       randomPizzas[i].style.width = newWidth;
     }
   }
@@ -507,23 +487,23 @@ function updatePositions() {
 
     // If the pizza will be off the page, don't change its position
     if (((items[i].basicLeft + 100 * phases[i % 5]) > windowWidth ||
-     (items[i].basicLeft + 100 * phases[i % 5]) < -74) && !initial) {
+          (items[i].basicLeft + 100 * phases[i % 5]) < -74) && !initial) {
       continue;
     }
 
     //set initial position of pizzas
     if (initial) {
-          items[i].style.left = items[i].basicLeft + 'px';//100 * phases[i % 5]
+          items[i].style.left = items[i].basicLeft + 'px';
     }
     //change positions based on scrolling distance (i.e. scrollTop)
-    items[i].style.transform = 'translateX(' + (100 * phases[i % 5]) + 'px)';//items[i].basicLeft +
-    //items[i].style.left = items[i].basicLeft + 100 * phases[i % 5] + 'px';
+    items[i].style.transform = 'translateX(' + (100 * phases[i % 5]) + 'px)';
 
-    //console.log("Pizza #" + i + "  left, top: ", items[i].style.left, items[i].style.top);
   }
 
   // After updatePositions runs once, set initial indicator to false
   if (initial) {initial = false;}
+
+  animating = false;
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
@@ -536,9 +516,11 @@ function updatePositions() {
 }
 
 // runs updatePositions on scroll
-//window.addEventListener('scroll', updatePositions);
 window.addEventListener('scroll', function() {
-  requestAnimationFrame(updatePositions);
+  if (!animating) {
+    requestAnimationFrame(updatePositions);
+  }
+  animating = true;
 });
 
 // Generates the sliding pizzas when the page loads.
@@ -546,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
   var windowHeight = window.innerHeight;
-  for (var i = 0; Math.floor(i / cols) * s < windowHeight; i++) {//var i = 0; i < 200; i++
+  for (var i = 0; Math.floor(i / cols) * s < windowHeight; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
